@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+const TOKEN = process.env.TOKEN;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -14,8 +15,13 @@ app.get('/', function(req, res) {
 app.post('/notify', function(req, res) {
     let title = req.body.title;
     let message = req.body.message;
-    io.emit('notification', { title: title, message: message });
-    res.send({ status: 'ok' });
+    let token = req.body.token;
+    if(token === TOKEN) {
+        io.emit('notification', { title: title, message: message });
+        res.send({ status: 'ok' });
+    } else {
+        res.send({ status: 'error' });
+    }
 });
 
 server.listen(80, function() {
