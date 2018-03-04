@@ -4,9 +4,18 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const TOKEN = process.env.TOKEN;
+const crypto = require('crypto');
+const algorithm = 'aes-256-ctr';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+function encrypt(text) {
+    let cipher = crypto.createCipher(algorithm, TOKEN);
+    let crypted = cipher.update(text, 'utf8', 'hex');
+    crypted += cipher.final('hex');
+    return crypted;
+}
 
 app.get('/', function(req, res) {
     res.send({ status: 'ok' });
@@ -17,7 +26,7 @@ app.post('/notify', function(req, res) {
     let message = req.body.message;
     let token = req.body.token;
     if(token === TOKEN) {
-        io.emit('notification', { title: title, message: message });
+        io.emit('notification', encrypt(JSON.stringify({ title: title, message: message })));
         res.send({ status: 'ok' });
     } else {
         res.send({ status: 'error' });
