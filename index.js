@@ -24,9 +24,10 @@ app.get('/', function(req, res) {
 app.post('/notify', function(req, res) {
     let title = req.body.title;
     let message = req.body.message;
+    let sectionID = req.body.sectionID;
     let token = req.body.token;
     if(token === TOKEN) {
-        io.emit('notification', encrypt(JSON.stringify({ title: title, message: message })));
+        io.emit('notification', encrypt(JSON.stringify({ title: title, message: message, sectionID: sectionID })));
         res.send({ status: 'ok' });
     } else {
         res.send({ status: 'error' });
